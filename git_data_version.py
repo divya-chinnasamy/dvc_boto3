@@ -109,7 +109,7 @@ if __name__ == "__main__":
     data_file = "insurance.csv"
     add_data_to_dvc(data_file)
 
-    git_commit(repo, "Add insurance.csv to DVC")
+    git_commit(repo, "Add insurance2.csv to DVC")
     push_to_dvc_remote()
     git_push(repo)
     dvc_checkout()   
