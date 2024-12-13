@@ -3,9 +3,6 @@ import boto3
 import git
 from git import Repo 
 import pandas as pd
-from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score
 
 # Initialize Git repository
 def init_git_repo():
@@ -109,7 +106,7 @@ if __name__ == "__main__":
     configure_s3_dvc_remote(bucket_name, region)
 
     
-    data_file = "Car.csv"
+    data_file = "insurance.csv"
     add_data_to_dvc(data_file)
 
     git_commit(repo, "Add insurance.csv to DVC")
