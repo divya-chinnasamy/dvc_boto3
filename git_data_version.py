@@ -3,6 +3,8 @@ import boto3
 import git
 from git import Repo 
 import pandas as pd
+import yaml
+import json
 
 # Initialize Git repository
 def init_git_repo():
@@ -25,7 +27,7 @@ def init_git_repo():
 # Commit changes to Git
 def git_commit(repo, message):
     try:
-        repo.git.add(A=True)  # Add all changes
+        repo.git.add()  # Add all changes
         repo.index.commit(message)
         print(f"Committed changes with message: '{message}'")
     except Exception as e:
@@ -94,6 +96,32 @@ def load_data(file_path):
     print(f"Data shape: {df.shape}")
     return df
 
+def extract_dvc_metadata(dvc_files):
+    dataset_metadata = []
+    for dvc_file in dvc_files:
+        # Extract dataset name from file name
+        dataset_name = os.path.splitext(os.path.basename(dvc_file))[0]
+
+        # Read the .dvc file
+        with open(dvc_file, 'r') as file:
+            dvc_data = yaml.safe_load(file)
+
+        # Extract md5 hash
+        md5_hash = dvc_data['outs'][0]['md5']
+
+        # Append metadata
+        dataset_metadata.append({
+            "dataset_name": dataset_name,
+            "md5": md5_hash
+        })
+    
+    return dataset_metadata
+
+def save_metadata_to_json(metadata, output_file):
+   
+    with open(output_file, 'w') as json_file:
+        json.dump(metadata, json_file, indent=4)
+
 
 if __name__ == "__main__":
     
@@ -106,12 +134,24 @@ if __name__ == "__main__":
     configure_s3_dvc_remote(bucket_name, region)
 
     
-    data_file = "insurance.csv"
+    data_file = "insurance1.csv"
     add_data_to_dvc(data_file)
 
-    git_commit(repo, "Add insurance2.csv to DVC")
+    git_commit(repo, "Add updated insurance1.csv to DVC")
     push_to_dvc_remote()
     git_push(repo)
     dvc_checkout()   
     #data = load_data(data_file)
 
+    dvc_files = ["Car.csv.dvc","insurance1.csv.dvc"]
+
+    # Output JSON file
+    # output_file = "dataset_metadata.json"
+
+    # # Extract metadata and save to JSON
+    # try:
+    #     metadata = extract_dvc_metadata(dvc_files)
+    #     save_metadata_to_json(metadata, output_file)
+    #     print(f"Metadata successfully saved to {output_file}")
+    # except Exception as e:
+    #     print(f"Error: {e}")
